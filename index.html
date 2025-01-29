@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Filtro AR Móvil</title>
+    <!-- Carga de dependencias -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        #loading { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); color: black; }
+    </style>
+</head>
+<body>
+    <div id="loading">Cargando modelo...</div>
+    <script>
+        // Configuración inicial
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Cargar modelo GLB
+        const loader = new THREE.GLTFLoader();
+        loader.load(
+            'assets/model.glb',
+            (gltf) => {
+                const model = gltf.scene;
+                scene.add(model);
+                model.position.set(0, 0, -5); // Posición inicial
+                model.scale.set(0.5, 0.5, 0.5);
+                document.getElementById('loading').style.display = 'none';
+            },
+            undefined,
+            (error) => console.error('Error:', error)
+        );
+
+        // Gestos táctiles
+        const hammer = new Hammer(document.body);
+        let scale = 1;
+        
+        hammer.on('pan', (e) => { // Mover
+            model.position.x += e.deltaX * 0.01;
+            model.position.y -= e.deltaY * 0.01;
+        });
+
+        hammer.get('pinch').set({ enable: true }).on('pinch', (e) => { // Escalar
+            scale *= e.scale;
+            model.scale.set(scale, scale, scale);
+        });
+
+        hammer.get('rotate').set({ enable: true }).on('rotate', (e) => { // Rotar
+            model.rotation.y += e.rotation * 0.01;
+        });
+
+        // Animación
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+</html>
