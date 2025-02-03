@@ -3,71 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Filtro AR Funcional</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
-    <style>
-        body { margin: 0; overflow: hidden; }
-        #loading { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); color: black; }
-    </style>
+    <title>Filtro AR con Video - AR.js</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ar.js@1.7.2/aframe/build/aframe-ar.min.js"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="loading">Cargando modelo...</div>
-    <script>
-        // Configuración inicial
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        let model, scale = 1;
-
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-
-        // Cargar modelo
-        const loader = new THREE.GLTFLoader();
-        loader.load(
-            'https://raw.githubusercontent.com/ZekturCh/BKTry9ru5th/main/assets/3dmodel.glb',
-            (gltf) => {
-                model = gltf.scene;
-                scene.add(model);
-                model.position.set(0, 0, -5);
-                model.scale.set(0.5, 0.5, 0.5);
-                document.getElementById('loading').style.display = 'none';
-            },
-            undefined,
-            (error) => alert("Error: Modelo no encontrado o red bloqueada.")
-        );
-
-        // Configurar gestos
-        const hammer = new Hammer(document.body);
-        const pinch = new Hammer.Pinch();
-        const rotate = new Hammer.Rotate();
-        hammer.add([pinch, rotate]);
-
-        hammer.on('pan', (e) => {
-            if (!model) return;
-            model.position.x += e.deltaX * 0.01;
-            model.position.y -= e.deltaY * 0.01;
-        });
-
-        hammer.on('pinch', (e) => {
-            if (!model) return;
-            scale = Math.max(0.3, Math.min(2, scale * e.scale));
-            model.scale.set(scale, scale, scale);
-        });
-
-        hammer.on('rotate', (e) => {
-            if (!model) return;
-            model.rotation.y += e.rotation * 0.01;
-        });
-
-        // Animación
-        function animate() {
-            requestAnimationFrame(animate);
-            renderer.render(scene, camera);
-        }
-        animate();
-    </script>
+    <a-scene embedded arjs>
+        <a-marker preset="custom" type="pattern" url="assets/marker.patt">
+            <a-video src="assets/video.mp4" position="0 0 0" rotation="-90 0 0" width="1" height="0.5" autoplay loop></a-video>
+        </a-marker>
+        <a-entity camera></a-entity>
+    </a-scene>
 </body>
 </html>
+
